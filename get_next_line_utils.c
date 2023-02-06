@@ -6,7 +6,7 @@
 /*   By: mbalayan <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 21:32:37 by mbalayan          #+#    #+#             */
-/*   Updated: 2023/01/31 21:32:39 by mbalayan         ###   ########.fr       */
+/*   Updated: 2023/02/05 20:28:51 by mbalayan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,11 @@ char	*ft_strdup(char const *str)
 }
  char	*ft_read(char *temp, int fd, char *buf)
 {
-	size_t		r;
+	int		r;
 
 	r = 1;
-	char *li_ed = ft_strchr(temp, '\n');
-	while (r && (!li_ed))
+	//char *li_ed = ft_strchr(temp, '\n');
+	while (r && (!ft_strchr(temp, '\n')))
 	{
 		r = read (fd, buf, BUFFER_SIZE);
 		if (r == -1)
