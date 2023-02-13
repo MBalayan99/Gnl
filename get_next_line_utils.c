@@ -95,7 +95,7 @@ char	*ft_strjoin(char *s1, char const *s2)
 	if (s1 == NULL || s2 == NULL)
 		return (NULL);
 	new_str_len = ft_strlen(s1) + ft_strlen(s2);
-	new = (char *)calloc((new_str_len + 1), sizeof(char));
+	new = (char *)malloc((new_str_len + 1) * sizeof(char));
 	if (!(new))
 		return (NULL);
 	while (s1[i] != '\0')
