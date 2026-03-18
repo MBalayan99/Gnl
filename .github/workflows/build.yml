@@ -1,44 +1,29 @@
-name: Build C Project
+name: Build C Project (Community)
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [ main ]
 
 jobs:
   build:
-    name: Build and analyze
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  
 
-      - name: Install build-essential
+      - name: Install Cppcheck
+        run: sudo apt-get update && sudo apt-get install -y cppcheck
+
+      - name: Run Cppcheck
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential unzip
-
-      - name: Download Build Wrapper
-        run: |
-          curl -sSLo build-wrapper.zip ${{ secrets.SONAR_HOST_URL }}/static/cpp/build-wrapper-linux-x86.zip
-          unzip -o build-wrapper.zip
-         
-          chmod +x ./build-wrapper-linux-x86/build-wrapper-linux-x86-64
-
-      - name: Build with Build Wrapper
-        run: |         
-          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output make re
+          # Генерируем XML отчет, который понимает SonarQube
+          cppcheck --xml --xml-version=2 . 2> cppcheck-report.xml
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           args: >
-            -Dsonar.cfamily.build-wrapper-output=bw-output
+            -Dsonar.c.cppcheck.reportPath=cppcheck-report.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
