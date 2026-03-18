@@ -2,30 +2,43 @@ name: Build C Project
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
     name: Build and analyze
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  
 
-      - name: Install dependencies
+      - name: Install build-essential
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake
+          sudo apt-get install -y build-essential unzip
 
-      
-      - name: Configure CMake
-        run: cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Download Build Wrapper
+        run: |
+          curl -sSLo build-wrapper.zip ${{ secrets.SONAR_HOST_URL }}/static/cpp/build-wrapper-linux-x86.zip
+          unzip -o build-wrapper.zip
+         
+          chmod +x ./build-wrapper-linux-x86/build-wrapper-linux-x86-64
+
+      - name: Build with Build Wrapper
+        run: |         
+          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output make re
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          args: >
+            -Dsonar.cfamily.build-wrapper-output=bw-output
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
